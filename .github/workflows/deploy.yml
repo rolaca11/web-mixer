@@ -39,7 +39,7 @@ jobs:
       - name: Build
         run: pnpm run build
         env:
-          BASE_PATH: /${{ github.event.repository.name }}/
+          BASE_PATH: /web-mixer/
 
       - name: Copy index.html for SPA routing
         run: cp build/client/index.html build/client/404.html
