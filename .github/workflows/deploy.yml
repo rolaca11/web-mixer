@@ -38,11 +38,12 @@ jobs:
 
       - name: Build
         run: pnpm run build
-        env:
-          BASE_PATH: /web-mixer/
 
       - name: Copy index.html for SPA routing
         run: cp build/client/index.html build/client/404.html
+
+      - name: Add CNAME for custom domain
+        run: echo "mixer.ropi.dev" > build/client/CNAME
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
