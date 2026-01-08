@@ -1,13 +1,13 @@
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import { MixerApp } from "~/components/mixer/MixerApp";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Web Mixer - Audio Mixing Application" },
+    { name: "description", content: "A DAW-style audio mixer for mixing multiple tracks" },
   ];
 }
 
 export default function Home() {
-  return <Welcome />;
+  return <MixerApp />;
 }
