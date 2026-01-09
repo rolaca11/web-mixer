@@ -40,13 +40,10 @@ export const TrackLane = memo(function TrackLane({
       e.preventDefault();
       const audioFileId = e.dataTransfer.getData('audio-file-id');
       if (audioFileId) {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const startTime = snapToBeat(Math.max(0, x / zoom));
-        createClip(audioFileId, track.id, startTime);
+        createClip(audioFileId, track.id, 0);
       }
     },
-    [createClip, track.id, zoom, snapToBeat]
+    [createClip, track.id]
   );
 
   const handleStartRename = useCallback(() => {
