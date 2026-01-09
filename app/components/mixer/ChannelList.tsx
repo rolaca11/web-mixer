@@ -6,7 +6,7 @@ export function ChannelList() {
   const orderedChannels = getOrderedChannels(channels);
 
   return (
-    <div className="flex items-stretch gap-3 h-full">
+    <div className="flex items-stretch h-full">
       {orderedChannels.map((channel) => (
         <ChannelStrip key={channel.id} channel={channel} />
       ))}

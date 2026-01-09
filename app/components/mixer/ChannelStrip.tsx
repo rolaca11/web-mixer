@@ -24,7 +24,7 @@ export function ChannelStrip({ channel }: ChannelStripProps) {
 
   return (
     <div
-      className={`flex flex-col items-center gap-3 bg-gray-800 border transition-colors ${
+      className={`flex flex-col items-center gap-3 p-3 bg-gray-800 border transition-colors ${
         isEffectivelyMuted ? 'border-gray-700 opacity-60' : 'border-gray-600'
       }`}
     >
