@@ -7,6 +7,7 @@ interface AudioClipProps {
   clip: AudioClipType;
   audioFile: AudioFile;
   zoom: number;
+  scrollX: number;
   trackColor: string;
   isSelected: boolean;
   onMouseDown: (e: React.MouseEvent, clipId: string) => void;
@@ -16,13 +17,14 @@ export const AudioClip = memo(function AudioClip({
   clip,
   audioFile,
   zoom,
+  scrollX,
   trackColor,
   isSelected,
   onMouseDown,
 }: AudioClipProps) {
   const { deleteClip, selectClip } = useMixerStore();
 
-  const x = clip.startTime * zoom;
+  const x = clip.startTime * zoom - scrollX;
   const width = Math.max(10, clip.duration * zoom);
 
   const handleMouseDown = useCallback(

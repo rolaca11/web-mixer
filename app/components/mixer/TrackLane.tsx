@@ -131,6 +131,7 @@ export const TrackLane = memo(function TrackLane({
               clip={clip}
               audioFile={audioFile}
               zoom={zoom}
+              scrollX={ui.scrollX}
               trackColor={track.color}
               isSelected={ui.selectedClipIds.includes(clip.id)}
               onMouseDown={onClipMouseDown}
