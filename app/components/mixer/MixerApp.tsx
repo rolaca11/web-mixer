@@ -134,7 +134,7 @@ export function MixerApp() {
       </main>
 
       <footer className="border-t border-gray-700 flex-shrink-0 flex">
-        <div className="flex-1 border-r border-gray-700 p-3 overflow-x-auto">
+        <div className="flex-1 border-r border-gray-700 overflow-x-auto">
           <ChannelList />
         </div>
 
