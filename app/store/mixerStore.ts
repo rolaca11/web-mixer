@@ -30,6 +30,7 @@ const initialUI: UIState = {
   scrollX: 0,
   selectedClipIds: [],
   selectedTrackId: null,
+  snapToGrid: true,
 };
 
 export const useMixerStore = create<MixerState>()(
@@ -323,6 +324,12 @@ export const useMixerStore = create<MixerState>()(
       set((state) => {
         state.ui.selectedClipIds = [];
         state.ui.selectedTrackId = null;
+      });
+    },
+
+    toggleSnapToGrid: () => {
+      set((state) => {
+        state.ui.snapToGrid = !state.ui.snapToGrid;
       });
     },
   }))
