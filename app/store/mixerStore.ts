@@ -118,7 +118,7 @@ export const useMixerStore = create<MixerState>()(
       const track: Track = {
         id: trackId,
         channelId,
-        name: `Track ${trackCount + 1}`,
+        name: `Channel ${channelCount + 1}`,
         color: TRACK_COLORS[trackCount % TRACK_COLORS.length],
         order: trackCount,
       };
@@ -194,7 +194,7 @@ export const useMixerStore = create<MixerState>()(
       const track: Track = {
         id: trackId,
         channelId,
-        name: `Track ${trackCount + 1}`,
+        name: `Channel ${trackCount + 1}`,
         color: TRACK_COLORS[trackCount % TRACK_COLORS.length],
         order: trackCount,
       };
@@ -215,6 +215,20 @@ export const useMixerStore = create<MixerState>()(
           delete state.clips[clip.id];
         }
         delete state.tracks[trackId];
+      });
+    },
+
+    renameTrack: (trackId: string, name: string) => {
+      set((state) => {
+        const track = state.tracks[trackId];
+        if (track) {
+          track.name = name;
+          // Also update the associated channel name
+          const channel = state.channels[track.channelId];
+          if (channel) {
+            channel.name = name;
+          }
+        }
       });
     },
 

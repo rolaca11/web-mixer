@@ -152,17 +152,17 @@ export function Timeline({ onSeek }: TimelineProps) {
               d="M12 4v16m8-8H4"
             />
           </svg>
-          Add Track
+          Add Channel
         </button>
       </div>
 
       <div className="flex">
-        <div className="w-32 flex-shrink-0" />
+        <div className="w-48 flex-shrink-0" />
         <div className="flex-1">
           <TimeRuler
             zoom={ui.zoom}
             scrollX={ui.scrollX}
-            width={containerWidth - 128}
+            width={containerWidth - 192}
             onClick={handleSeek}
           />
         </div>
@@ -184,11 +184,11 @@ export function Timeline({ onSeek }: TimelineProps) {
 
           {orderedTracks.length === 0 && (
             <div className="flex items-center justify-center h-32 text-gray-500">
-              No tracks. Add a channel to get started.
+              No channels. Add a channel to get started.
             </div>
           )}
 
-          <div className="absolute top-0 bottom-0 left-32 right-0 pointer-events-none">
+          <div className="absolute top-0 bottom-0 left-48 right-0 pointer-events-none">
             <Playhead
               currentTime={transport.currentTime}
               zoom={ui.zoom}

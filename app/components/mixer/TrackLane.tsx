@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { AudioClip } from './AudioClip';
 import { useMixerStore, getClipsForTrack } from '~/store/mixerStore';
 import type { Track } from '~/types/mixer';
@@ -14,9 +14,12 @@ export const TrackLane = memo(function TrackLane({
   zoom,
   onClipMouseDown,
 }: TrackLaneProps) {
-  const { clips, audioFiles, ui, removeTrack, tracks, createClip } = useMixerStore();
+  const { clips, audioFiles, ui, removeTrack, renameTrack, tracks, createClip } = useMixerStore();
   const trackClips = getClipsForTrack(clips, track.id);
   const canDelete = Object.keys(tracks).length > 1;
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(track.name);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -37,19 +40,69 @@ export const TrackLane = memo(function TrackLane({
     [createClip, track.id, zoom]
   );
 
+  const handleStartRename = useCallback(() => {
+    setEditName(track.name);
+    setIsEditing(true);
+  }, [track.name]);
+
+  const handleFinishRename = useCallback(() => {
+    if (editName.trim()) {
+      renameTrack(track.id, editName.trim());
+    }
+    setIsEditing(false);
+  }, [editName, renameTrack, track.id]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter') {
+        handleFinishRename();
+      } else if (e.key === 'Escape') {
+        setIsEditing(false);
+        setEditName(track.name);
+      }
+    },
+    [handleFinishRename, track.name]
+  );
+
   return (
     <div className="flex border-b border-gray-700 h-16">
-      <div className="w-32 flex-shrink-0 bg-gray-800 border-r border-gray-700 flex items-center px-2 gap-2">
+      <div className="w-48 flex-shrink-0 bg-gray-800 border-r border-gray-700 flex items-center px-2 gap-1">
         <div
           className="w-3 h-3 rounded-full flex-shrink-0"
           style={{ backgroundColor: track.color }}
         />
-        <span className="text-sm text-gray-300 truncate flex-1">{track.name}</span>
+        {isEditing ? (
+          <input
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onBlur={handleFinishRename}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            className="flex-1 min-w-0 text-sm text-gray-300 bg-gray-700 px-1 rounded outline-none focus:ring-1 focus:ring-blue-500"
+          />
+        ) : (
+          <span className="text-sm text-gray-300 truncate flex-1">{track.name}</span>
+        )}
+        <button
+          onClick={handleStartRename}
+          className="p-1 text-gray-500 hover:text-blue-400 transition-colors flex-shrink-0"
+          title="Rename Channel"
+        >
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+            />
+          </svg>
+        </button>
         {canDelete && (
           <button
             onClick={() => removeTrack(track.id)}
             className="p-1 text-gray-500 hover:text-red-400 transition-colors flex-shrink-0"
-            title="Remove Track"
+            title="Remove Channel"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
