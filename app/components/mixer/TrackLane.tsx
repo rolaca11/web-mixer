@@ -117,7 +117,7 @@ export const TrackLane = memo(function TrackLane({
       </div>
 
       <div
-        className="flex-1 relative bg-gray-900/50"
+        className="flex-1 relative bg-gray-900/50 overflow-hidden min-w-0"
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
