@@ -49,6 +49,7 @@ export interface UIState {
   scrollX: number;
   selectedClipIds: string[];
   selectedTrackId: string | null;
+  snapToGrid: boolean;
 }
 
 export interface DragState {
@@ -108,4 +109,5 @@ export interface MixerState {
   setScrollX: (scrollX: number) => void;
   selectClip: (clipId: string, additive?: boolean) => void;
   clearSelection: () => void;
+  toggleSnapToGrid: () => void;
 }

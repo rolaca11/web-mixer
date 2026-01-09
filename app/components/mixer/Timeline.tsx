@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
+import { Magnet } from 'lucide-react';
 import { TimeRuler } from './TimeRuler';
 import { TrackLane } from './TrackLane';
 import { Playhead } from './Playhead';
@@ -21,6 +22,7 @@ export function Timeline({ onSeek }: TimelineProps) {
     addChannel,
     createClip,
     channels,
+    toggleSnapToGrid,
   } = useMixerStore();
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -81,8 +83,10 @@ export function Timeline({ onSeek }: TimelineProps) {
       const timeDelta = deltaX / ui.zoom;
       let newStartTime = Math.max(0, dragState.originalStartTime + timeDelta);
 
-      // Snap to beat
-      newStartTime = snapToBeat(newStartTime);
+      // Snap to beat if enabled
+      if (ui.snapToGrid) {
+        newStartTime = snapToBeat(newStartTime);
+      }
 
       const orderedTracks = getOrderedTracks(tracks);
       const trackHeight = 64;
@@ -111,7 +115,7 @@ export function Timeline({ onSeek }: TimelineProps) {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [dragState, ui.zoom, tracks, moveClip, snapToBeat]);
+  }, [dragState, ui.zoom, ui.snapToGrid, tracks, moveClip, snapToBeat]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
@@ -160,7 +164,7 @@ export function Timeline({ onSeek }: TimelineProps) {
 
   return (
     <div className="flex flex-col h-full overflow-hidden" ref={containerRef}>
-      <div className="flex items-center gap-2 px-3 py-2 bg-gray-800 border-b border-gray-700">
+      <div className="flex items-center gap-3 px-3 py-2 bg-gray-800 border-b border-gray-700">
         <span className="text-sm text-gray-400">Zoom:</span>
         <input
           type="range"
@@ -173,6 +177,18 @@ export function Timeline({ onSeek }: TimelineProps) {
         <span className="text-sm text-gray-500 min-w-[3rem]">
           {ui.zoom}px/s
         </span>
+
+        <button
+          onClick={toggleSnapToGrid}
+          className={`p-2 rounded transition-colors ${
+            ui.snapToGrid
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+          }`}
+          title="Toggle snap to grid"
+        >
+          <Magnet className="w-6 h-6" />
+        </button>
 
         <div className="flex-1" />
 
