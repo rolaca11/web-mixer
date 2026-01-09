@@ -14,8 +14,8 @@ interface TransportBarProps {
 }
 
 export function TransportBar({ onPlay, onPause, onStop }: TransportBarProps) {
-  const { transport, setLoop } = useMixerStore();
-  const { isPlaying, currentTime, loopEnabled } = transport;
+  const { transport, setLoop, setTempo } = useMixerStore();
+  const { isPlaying, currentTime, loopEnabled, tempo } = transport;
 
   const handlePlayPause = () => {
     if (isPlaying) {
@@ -77,6 +77,23 @@ export function TransportBar({ onPlay, onPause, onStop }: TransportBarProps) {
 
       <div className="font-mono text-lg bg-gray-800 px-3 py-1 rounded border border-gray-700 min-w-[120px] text-center">
         {formatTime(currentTime)}
+      </div>
+
+      <div className="flex items-center gap-2">
+        <label className="text-sm text-gray-400">BPM:</label>
+        <input
+          type="number"
+          min="20"
+          max="300"
+          value={tempo}
+          onChange={(e) => {
+            const value = Number(e.target.value);
+            if (!isNaN(value)) {
+              setTempo(value);
+            }
+          }}
+          className="w-16 px-2 py-1 bg-gray-800 border border-gray-700 rounded text-center font-mono text-sm focus:outline-none focus:border-blue-500"
+        />
       </div>
     </div>
   );

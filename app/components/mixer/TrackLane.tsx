@@ -14,12 +14,21 @@ export const TrackLane = memo(function TrackLane({
   zoom,
   onClipMouseDown,
 }: TrackLaneProps) {
-  const { clips, audioFiles, ui, removeTrack, renameTrack, tracks, createClip } = useMixerStore();
+  const { clips, audioFiles, ui, removeTrack, renameTrack, tracks, createClip, transport } = useMixerStore();
   const trackClips = getClipsForTrack(clips, track.id);
   const canDelete = Object.keys(tracks).length > 1;
 
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(track.name);
+
+  const snapToBeat = useCallback(
+    (time: number): number => {
+      const beatDuration = 60 / transport.tempo;
+      const beat = Math.round(time / beatDuration);
+      return beat * beatDuration;
+    },
+    [transport.tempo]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -33,11 +42,11 @@ export const TrackLane = memo(function TrackLane({
       if (audioFileId) {
         const rect = e.currentTarget.getBoundingClientRect();
         const x = e.clientX - rect.left;
-        const startTime = Math.max(0, x / zoom);
+        const startTime = snapToBeat(Math.max(0, x / zoom));
         createClip(audioFileId, track.id, startTime);
       }
     },
-    [createClip, track.id, zoom]
+    [createClip, track.id, zoom, snapToBeat]
   );
 
   const handleStartRename = useCallback(() => {
