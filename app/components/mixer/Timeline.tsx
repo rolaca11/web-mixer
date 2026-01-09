@@ -19,6 +19,7 @@ export function Timeline({ onSeek }: TimelineProps) {
     setScrollX,
     addTrack,
     addChannel,
+    createClip,
     channels,
   } = useMixerStore();
 
@@ -120,6 +121,28 @@ export function Timeline({ onSeek }: TimelineProps) {
     [onSeek]
   );
 
+  const handleTimelineDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  }, []);
+
+  const handleTimelineDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      const audioFileId = e.dataTransfer.getData('audio-file-id');
+      if (!audioFileId) return;
+
+      const channelId = addChannel();
+      const newTracks = useMixerStore.getState().tracks;
+      const track = Object.values(newTracks).find((t) => t.channelId === channelId);
+
+      if (track) {
+        createClip(audioFileId, track.id, 0);
+      }
+    },
+    [addChannel, createClip]
+  );
+
   const orderedTracks = getOrderedTracks(tracks);
   const firstChannelId = Object.keys(channels)[0];
 
@@ -184,8 +207,12 @@ export function Timeline({ onSeek }: TimelineProps) {
           ))}
 
           {orderedTracks.length === 0 && (
-            <div className="flex items-center justify-center h-32 text-gray-500">
-              No channels. Add a channel to get started.
+            <div
+              className="flex items-center justify-center h-32 text-gray-500"
+              onDragOver={handleTimelineDragOver}
+              onDrop={handleTimelineDrop}
+            >
+              Drop an audio file here to create a channel
             </div>
           )}
 
@@ -207,7 +234,11 @@ export function Timeline({ onSeek }: TimelineProps) {
                 Channel
               </button>
             </div>
-            <div className="flex-1" />
+            <div
+              className="flex-1 bg-gray-900/30"
+              onDragOver={handleTimelineDragOver}
+              onDrop={handleTimelineDrop}
+            />
           </div>
 
           <div className="absolute top-0 bottom-0 left-48 right-0 pointer-events-none">
