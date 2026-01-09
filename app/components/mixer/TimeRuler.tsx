@@ -70,18 +70,18 @@ export function TimeRuler({ zoom, scrollX, width, tempo, onClick }: TimeRulerPro
       onClick={handleClick}
     >
       {markers.map(({ beat, x, isBar, isBeat }) => (
-        <div
-          key={beat}
-          className="absolute top-0 flex flex-col items-center"
-          style={{ left: x }}
-        >
+        <div key={beat}>
           <div
-            className={`w-px ${
+            className={`absolute top-0 w-px ${
               isBar ? 'h-4 bg-gray-400' : 'h-2 bg-gray-600'
             }`}
+            style={{ left: x }}
           />
           {isBar && (
-            <span className="text-xs text-gray-400 mt-1 whitespace-nowrap">
+            <span
+              className="absolute top-4 text-xs text-gray-400 whitespace-nowrap -translate-x-1/2"
+              style={{ left: x }}
+            >
               {formatBeatTime(beat, beatsPerBar)}
             </span>
           )}
