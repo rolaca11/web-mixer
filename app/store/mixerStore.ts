@@ -22,6 +22,7 @@ const initialTransport: TransportState = {
   loopEnabled: false,
   loopStart: 0,
   loopEnd: 30,
+  tempo: 120,
 };
 
 const initialUI: UIState = {
@@ -281,6 +282,12 @@ export const useMixerStore = create<MixerState>()(
         if (end !== undefined) {
           state.transport.loopEnd = end;
         }
+      });
+    },
+
+    setTempo: (tempo: number) => {
+      set((state) => {
+        state.transport.tempo = Math.max(20, Math.min(300, tempo));
       });
     },
 

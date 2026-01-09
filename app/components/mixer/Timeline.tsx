@@ -64,13 +64,25 @@ export function Timeline({ onSeek }: TimelineProps) {
     [clips]
   );
 
+  const snapToBeat = useCallback(
+    (time: number): number => {
+      const beatDuration = 60 / transport.tempo;
+      const beat = Math.round(time / beatDuration);
+      return beat * beatDuration;
+    },
+    [transport.tempo]
+  );
+
   useEffect(() => {
     if (!dragState) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaX = e.clientX - dragState.startX;
       const timeDelta = deltaX / ui.zoom;
-      const newStartTime = Math.max(0, dragState.originalStartTime + timeDelta);
+      let newStartTime = Math.max(0, dragState.originalStartTime + timeDelta);
+
+      // Snap to beat
+      newStartTime = snapToBeat(newStartTime);
 
       const orderedTracks = getOrderedTracks(tracks);
       const trackHeight = 64;
@@ -99,7 +111,7 @@ export function Timeline({ onSeek }: TimelineProps) {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [dragState, ui.zoom, tracks, moveClip]);
+  }, [dragState, ui.zoom, tracks, moveClip, snapToBeat]);
 
   const handleWheel = useCallback(
     (e: React.WheelEvent) => {
@@ -187,6 +199,7 @@ export function Timeline({ onSeek }: TimelineProps) {
             zoom={ui.zoom}
             scrollX={ui.scrollX}
             width={containerWidth - 192}
+            tempo={transport.tempo}
             onClick={handleSeek}
           />
         </div>
