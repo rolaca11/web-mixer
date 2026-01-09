@@ -1,6 +1,6 @@
 import { Slider } from '~/components/ui/Slider';
 import { Knob } from '~/components/ui/Knob';
-import { useMixerStore } from '~/store/mixerStore';
+import { useMixerStore, getTracksForChannel } from '~/store/mixerStore';
 import type { Channel } from '~/types/mixer';
 
 interface ChannelStripProps {
@@ -15,20 +15,27 @@ export function ChannelStrip({ channel }: ChannelStripProps) {
     toggleSolo,
     removeChannel,
     channels,
+    tracks,
   } = useMixerStore();
 
   const canDelete = Object.keys(channels).length > 1;
+  const channelTracks = getTracksForChannel(tracks, channel.id);
+  const trackColor = channelTracks[0]?.color || '#6b7280';
 
   const hasSoloActive = Object.values(channels).some((ch) => ch.solo);
   const isEffectivelyMuted = channel.muted || (hasSoloActive && !channel.solo);
 
   return (
     <div
-      className={`flex flex-col items-center gap-3 p-3 bg-gray-800 border-r transition-colors ${
+      className={`flex flex-col items-center gap-3 p-3 border-r transition-colors ${
         isEffectivelyMuted ? 'border-gray-700 opacity-60' : 'border-gray-600'
       }`}
+      style={{ backgroundColor: trackColor + '20' }}
     >
-      <div className="text-sm font-medium text-gray-300 truncate w-full text-center">
+      <div
+        className="text-sm font-medium truncate w-full text-center px-2 py-1 rounded"
+        style={{ backgroundColor: trackColor, color: 'white' }}
+      >
         {channel.name}
       </div>
 
