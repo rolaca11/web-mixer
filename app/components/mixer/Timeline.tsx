@@ -147,7 +147,7 @@ export function Timeline({ onSeek }: TimelineProps) {
   const firstChannelId = Object.keys(channels)[0];
 
   return (
-    <div className="flex flex-col h-full" ref={containerRef}>
+    <div className="flex flex-col h-full overflow-hidden" ref={containerRef}>
       <div className="flex items-center gap-2 px-3 py-2 bg-gray-800 border-b border-gray-700">
         <span className="text-sm text-gray-400">Zoom:</span>
         <input
@@ -180,9 +180,9 @@ export function Timeline({ onSeek }: TimelineProps) {
         </button>
       </div>
 
-      <div className="flex">
+      <div className="flex overflow-hidden">
         <div className="w-48 flex-shrink-0" />
-        <div className="flex-1">
+        <div className="flex-1 min-w-0 overflow-hidden">
           <TimeRuler
             zoom={ui.zoom}
             scrollX={ui.scrollX}
@@ -193,10 +193,10 @@ export function Timeline({ onSeek }: TimelineProps) {
       </div>
 
       <div
-        className="flex-1 overflow-auto relative"
+        className="flex-1 overflow-hidden relative flex flex-col"
         onWheel={handleWheel}
       >
-        <div className="relative">
+        <div className="relative flex flex-col flex-1 overflow-hidden">
           {orderedTracks.map((track) => (
             <TrackLane
               key={track.id}
@@ -216,8 +216,8 @@ export function Timeline({ onSeek }: TimelineProps) {
             </div>
           )}
 
-          <div className="flex border-b border-gray-700 h-12">
-            <div className="w-48 flex-shrink-0 bg-gray-800 border-r border-gray-700 flex items-center justify-center">
+          <div className="flex flex-1 min-h-12">
+            <div className="w-48 flex-shrink-0 bg-gray-800 border-r border-gray-700 flex items-start justify-center pt-3">
               <button
                 onClick={() => addChannel()}
                 className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm transition-colors flex items-center gap-1"
@@ -235,10 +235,12 @@ export function Timeline({ onSeek }: TimelineProps) {
               </button>
             </div>
             <div
-              className="flex-1 bg-gray-900/30"
+              className="flex-1 bg-gray-950 flex items-center justify-center text-gray-600 text-sm"
               onDragOver={handleTimelineDragOver}
               onDrop={handleTimelineDrop}
-            />
+            >
+              Drop audio here to create a new channel
+            </div>
           </div>
 
           <div className="absolute top-0 bottom-0 left-48 right-0 pointer-events-none">
