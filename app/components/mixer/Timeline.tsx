@@ -18,6 +18,7 @@ export function Timeline({ onSeek }: TimelineProps) {
     setZoom,
     setScrollX,
     addTrack,
+    addChannel,
     channels,
   } = useMixerStore();
 
@@ -187,6 +188,27 @@ export function Timeline({ onSeek }: TimelineProps) {
               No channels. Add a channel to get started.
             </div>
           )}
+
+          <div className="flex border-b border-gray-700 h-12">
+            <div className="w-48 flex-shrink-0 bg-gray-800 border-r border-gray-700 flex items-center justify-center">
+              <button
+                onClick={() => addChannel()}
+                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-sm transition-colors flex items-center gap-1"
+                title="Add Channel"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Channel
+              </button>
+            </div>
+            <div className="flex-1" />
+          </div>
 
           <div className="absolute top-0 bottom-0 left-48 right-0 pointer-events-none">
             <Playhead
