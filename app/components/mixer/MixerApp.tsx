@@ -11,7 +11,7 @@ function FileLibrary({
 }: {
   onFilesDropped: (files: File[]) => void;
 }) {
-  const { audioFiles, tracks, createClip } = useMixerStore();
+  const { audioFiles, tracks, clips, createClip, addChannel } = useMixerStore();
   const audioFileList = Object.values(audioFiles);
 
   const handleDragStart = (e: React.DragEvent, audioFileId: string) => {
@@ -19,7 +19,23 @@ function FileLibrary({
     e.dataTransfer.effectAllowed = 'copy';
   };
 
-  const firstTrackId = Object.keys(tracks)[0];
+  const handleDoubleClick = (audioFileId: string) => {
+    const trackList = Object.values(tracks);
+    const emptyTrack = trackList.find(
+      (track) => !Object.values(clips).some((clip) => clip.trackId === track.id)
+    );
+
+    if (emptyTrack) {
+      createClip(audioFileId, emptyTrack.id, 0);
+    } else {
+      const channelId = addChannel();
+      const newTracks = useMixerStore.getState().tracks;
+      const newTrack = Object.values(newTracks).find((t) => t.channelId === channelId);
+      if (newTrack) {
+        createClip(audioFileId, newTrack.id, 0);
+      }
+    }
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -32,13 +48,9 @@ function FileLibrary({
               key={file.id}
               draggable
               onDragStart={(e) => handleDragStart(e, file.id)}
-              onDoubleClick={() => {
-                if (firstTrackId) {
-                  createClip(file.id, firstTrackId, 0);
-                }
-              }}
+              onDoubleClick={() => handleDoubleClick(file.id)}
               className="flex items-center gap-2 p-2 bg-gray-700 rounded cursor-grab hover:bg-gray-600 transition-colors"
-              title="Drag to timeline or double-click to add to first track"
+              title="Drag to timeline or double-click to add to empty channel"
             >
               <svg
                 className="w-4 h-4 text-gray-400 flex-shrink-0"
