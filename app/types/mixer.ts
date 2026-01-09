@@ -92,6 +92,7 @@ export interface MixerState {
 
   addTrack: (channelId: string) => string;
   removeTrack: (trackId: string) => void;
+  renameTrack: (trackId: string, name: string) => void;
   moveTrackToChannel: (trackId: string, newChannelId: string) => void;
 
   play: () => void;
