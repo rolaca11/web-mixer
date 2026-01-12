@@ -6,6 +6,7 @@ export interface AudioFile {
   numberOfChannels: number;
   audioBuffer: AudioBuffer;
   waveformPeaks: Float32Array;
+  tempo?: number;
 }
 
 export interface AudioClip {
@@ -80,6 +81,7 @@ export interface MixerState {
 
   addAudioFile: (file: AudioFile) => void;
   removeAudioFile: (id: string) => void;
+  updateAudioFileTempo: (fileId: string, tempo: number | undefined) => void;
 
   createClip: (audioFileId: string, trackId: string, startTime: number) => string;
   moveClip: (clipId: string, newTrackId: string, newStartTime: number) => void;
