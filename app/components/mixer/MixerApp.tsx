@@ -42,7 +42,7 @@ function FileLibrary({
       <DropZone onFilesDropped={onFilesDropped} />
 
       {audioFileList.length > 0 && (
-        <div className="grid grid-cols-3 gap-2 overflow-y-auto max-h-32">
+        <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
           {audioFileList.map((file) => (
             <div
               key={file.id}
