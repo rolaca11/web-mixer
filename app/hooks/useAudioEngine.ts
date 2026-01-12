@@ -47,6 +47,20 @@ export function useAudioEngine() {
     });
   }, [channels]);
 
+  useEffect(() => {
+    const engine = engineRef.current;
+    if (!engine) return;
+
+    engine.setMetronomeEnabled(transport.metronomeEnabled);
+  }, [transport.metronomeEnabled]);
+
+  useEffect(() => {
+    const engine = engineRef.current;
+    if (!engine) return;
+
+    engine.setTempo(transport.tempo);
+  }, [transport.tempo]);
+
   const prepareClipsForPlayback = useCallback((): ScheduledClip[] => {
     const result: ScheduledClip[] = [];
 

@@ -1,4 +1,5 @@
 import { useMixerStore } from '~/store/mixerStore';
+import { Timer } from 'lucide-react';
 
 function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
@@ -14,8 +15,8 @@ interface TransportBarProps {
 }
 
 export function TransportBar({ onPlay, onPause, onStop }: TransportBarProps) {
-  const { transport, setLoop, setTempo } = useMixerStore();
-  const { isPlaying, currentTime, loopEnabled, tempo } = transport;
+  const { transport, setLoop, setTempo, setMetronome } = useMixerStore();
+  const { isPlaying, currentTime, loopEnabled, tempo, metronomeEnabled } = transport;
 
   const handlePlayPause = () => {
     if (isPlaying) {
@@ -94,6 +95,15 @@ export function TransportBar({ onPlay, onPause, onStop }: TransportBarProps) {
           }}
           className="w-16 px-2 py-1 bg-gray-800 border border-gray-700 rounded text-center font-mono text-sm focus:outline-none focus:border-blue-500"
         />
+        <button
+          onClick={() => setMetronome(!metronomeEnabled)}
+          className={`p-2 rounded transition-colors ${
+            metronomeEnabled ? 'bg-orange-600 hover:bg-orange-700' : 'hover:bg-gray-700'
+          }`}
+          title={metronomeEnabled ? 'Metronome On' : 'Metronome Off'}
+        >
+          <Timer className="w-5 h-5" />
+        </button>
       </div>
     </div>
   );

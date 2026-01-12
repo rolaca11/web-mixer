@@ -20,10 +20,45 @@ export class AudioEngine {
   private loopEnd: number = 0;
   private loopTimeoutId: number | null = null;
 
+  private metronomeBuffer: AudioBuffer | null = null;
+  private metronomeAccentBuffer: AudioBuffer | null = null;
+  private metronomeGain: GainNode | null = null;
+  private metronomeScheduledSources: AudioBufferSourceNode[] = [];
+  private metronomeIntervalId: number | null = null;
+  private metronomeScheduledBeats: Set<number> = new Set();
+  private metronomeEnabled: boolean = false;
+  private tempo: number = 120;
+  private beatsPerBar: number = 4;
+
   async initialize(): Promise<void> {
     this.context = new AudioContext();
     this.masterGain = this.context.createGain();
     this.masterGain.connect(this.context.destination);
+
+    this.metronomeGain = this.context.createGain();
+    this.metronomeGain.gain.value = 0.5;
+    this.metronomeGain.connect(this.context.destination);
+
+    this.metronomeBuffer = this.createClickBuffer(1000);
+    this.metronomeAccentBuffer = this.createClickBuffer(2000);
+  }
+
+  private createClickBuffer(frequency: number): AudioBuffer {
+    if (!this.context) throw new Error('AudioContext not initialized');
+
+    const sampleRate = this.context.sampleRate;
+    const duration = 0.02;
+    const samples = Math.floor(sampleRate * duration);
+    const buffer = this.context.createBuffer(1, samples, sampleRate);
+    const data = buffer.getChannelData(0);
+
+    for (let i = 0; i < samples; i++) {
+      const t = i / sampleRate;
+      const envelope = Math.exp(-t * 50);
+      data[i] = Math.sin(2 * Math.PI * frequency * t) * envelope;
+    }
+
+    return buffer;
   }
 
   async resume(): Promise<void> {
@@ -103,6 +138,10 @@ export class AudioEngine {
 
     if (loopEnabled && loopEnd > loopStart) {
       this.scheduleLoopCallback(fromTime, loopStart, loopEnd, clips);
+    }
+
+    if (this.metronomeEnabled) {
+      this.startMetronome();
     }
   }
 
@@ -193,13 +232,90 @@ export class AudioEngine {
   pause(): number {
     const currentTime = this.getCurrentTime();
     this.stopAllClips();
+    this.stopMetronome();
     this.startPlaybackTime = currentTime;
     return currentTime;
   }
 
   stop(): void {
     this.stopAllClips();
+    this.stopMetronome();
     this.startPlaybackTime = 0;
+  }
+
+  setMetronomeEnabled(enabled: boolean): void {
+    this.metronomeEnabled = enabled;
+    if (!enabled) {
+      this.stopMetronome();
+    } else if (this.isPlaying) {
+      this.startMetronome();
+    }
+  }
+
+  setTempo(tempo: number): void {
+    this.tempo = tempo;
+    if (this.metronomeEnabled && this.isPlaying) {
+      this.stopMetronome();
+      this.startMetronome();
+    }
+  }
+
+  startMetronome(): void {
+    if (!this.context || !this.metronomeBuffer || !this.metronomeAccentBuffer || !this.metronomeGain) return;
+    if (!this.metronomeEnabled) return;
+
+    this.stopMetronome();
+
+    const beatDuration = 60 / this.tempo;
+    const scheduleAhead = 0.1;
+    const lookAhead = 2;
+
+    const scheduleBeats = () => {
+      if (!this.context || !this.metronomeBuffer || !this.metronomeAccentBuffer || !this.metronomeGain) return;
+      if (!this.isPlaying || !this.metronomeEnabled) return;
+
+      const currentTime = this.getCurrentTime();
+      const contextNow = this.context.currentTime;
+
+      for (let i = 0; i < lookAhead; i++) {
+        const beat = Math.floor(currentTime / beatDuration) + i;
+        const beatStartTime = beat * beatDuration;
+        const contextTime = contextNow + (beatStartTime - currentTime);
+
+        if (contextTime >= contextNow - 0.01 && contextTime < contextNow + scheduleAhead) {
+          if (this.metronomeScheduledBeats.has(beat)) continue;
+          this.metronomeScheduledBeats.add(beat);
+
+          const isFirstBeatOfBar = beat % this.beatsPerBar === 0;
+          const source = this.context.createBufferSource();
+          source.buffer = isFirstBeatOfBar ? this.metronomeAccentBuffer : this.metronomeBuffer;
+          source.connect(this.metronomeGain);
+          source.start(Math.max(contextNow, contextTime));
+          this.metronomeScheduledSources.push(source);
+        }
+      }
+    };
+
+    scheduleBeats();
+    this.metronomeIntervalId = window.setInterval(scheduleBeats, scheduleAhead * 1000 * 0.5);
+  }
+
+  stopMetronome(): void {
+    if (this.metronomeIntervalId !== null) {
+      window.clearInterval(this.metronomeIntervalId);
+      this.metronomeIntervalId = null;
+    }
+
+    for (const source of this.metronomeScheduledSources) {
+      try {
+        source.stop();
+        source.disconnect();
+      } catch {
+        // Source may have already stopped
+      }
+    }
+    this.metronomeScheduledSources = [];
+    this.metronomeScheduledBeats.clear();
   }
 
   seek(time: number): void {
@@ -220,11 +336,17 @@ export class AudioEngine {
 
   dispose(): void {
     this.stopAllClips();
+    this.stopMetronome();
     this.channelNodes.forEach((nodes) => {
       nodes.gain.disconnect();
       nodes.panner.disconnect();
     });
     this.channelNodes.clear();
+
+    if (this.metronomeGain) {
+      this.metronomeGain.disconnect();
+      this.metronomeGain = null;
+    }
 
     if (this.masterGain) {
       this.masterGain.disconnect();

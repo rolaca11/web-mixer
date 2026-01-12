@@ -23,6 +23,7 @@ const initialTransport: TransportState = {
   loopStart: 0,
   loopEnd: 30,
   tempo: 120,
+  metronomeEnabled: false,
 };
 
 const initialUI: UIState = {
@@ -289,6 +290,12 @@ export const useMixerStore = create<MixerState>()(
     setTempo: (tempo: number) => {
       set((state) => {
         state.transport.tempo = Math.max(20, Math.min(300, tempo));
+      });
+    },
+
+    setMetronome: (enabled: boolean) => {
+      set((state) => {
+        state.transport.metronomeEnabled = enabled;
       });
     },
 
