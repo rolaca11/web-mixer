@@ -1,7 +1,8 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { WaveformCanvas } from './WaveformCanvas';
 import { useMixerStore } from '~/store/mixerStore';
 import type { AudioClip as AudioClipType, AudioFile } from '~/types/mixer';
+import { calculateStretchedDuration } from '~/audio/psola';
 
 interface AudioClipProps {
   clip: AudioClipType;
@@ -22,10 +23,15 @@ export const AudioClip = memo(function AudioClip({
   isSelected,
   onMouseDown,
 }: AudioClipProps) {
-  const { deleteClip, selectClip } = useMixerStore();
+  const { deleteClip, selectClip, transport } = useMixerStore();
+
+  // Calculate the stretched duration based on tempo
+  const stretchedDuration = useMemo(() => {
+    return calculateStretchedDuration(clip.duration, audioFile.tempo, transport.tempo);
+  }, [clip.duration, audioFile.tempo, transport.tempo]);
 
   const x = clip.startTime * zoom - scrollX;
-  const width = Math.max(10, clip.duration * zoom);
+  const width = Math.max(10, stretchedDuration * zoom);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {

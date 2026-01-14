@@ -1,4 +1,9 @@
 import type { ScheduledClip } from '~/types/mixer';
+import {
+  getTimeStretchedBuffer,
+  calculateStretchFactor,
+  clearStretchCache,
+} from './psola';
 
 interface ChannelNodes {
   gain: GainNode;
@@ -151,11 +156,29 @@ export class AudioEngine {
     const channelNodes = this.channelNodes.get(clip.channelId);
     if (!channelNodes) return;
 
+    // Get stretch factor for tempo matching
+    const stretchFactor = calculateStretchFactor(clip.clipTempo, clip.playbackTempo);
+
+    // Get time-stretched buffer using PSOLA (preserves pitch)
+    const buffer = clip.clipTempo
+      ? getTimeStretchedBuffer(
+          clip.audioBuffer,
+          clip.clipTempo,
+          clip.playbackTempo,
+          this.context,
+          clip.id
+        )
+      : clip.audioBuffer;
+
+    // Calculate stretched duration and offset
+    const stretchedDuration = clip.duration * stretchFactor;
+    const stretchedOffset = clip.offsetInFile * stretchFactor;
+
     const source = this.context.createBufferSource();
-    source.buffer = clip.audioBuffer;
+    source.buffer = buffer;
     source.connect(channelNodes.gain);
 
-    const clipEnd = clip.startTime + clip.duration;
+    const clipEnd = clip.startTime + stretchedDuration;
     const now = this.context.currentTime;
 
     if (clipEnd <= fromTime) {
@@ -165,13 +188,13 @@ export class AudioEngine {
     const clipStartInPlayback = clip.startTime - fromTime;
 
     if (clipStartInPlayback >= 0) {
-      const duration = clip.duration;
-      source.start(now + clipStartInPlayback, clip.offsetInFile, duration);
+      source.start(now + clipStartInPlayback, stretchedOffset, stretchedDuration);
     } else {
+      // Calculate how far into the clip we are (in timeline time)
       const offsetIntoClip = -clipStartInPlayback;
-      const remainingDuration = clip.duration - offsetIntoClip;
+      const remainingDuration = stretchedDuration - offsetIntoClip;
       if (remainingDuration > 0) {
-        source.start(now, clip.offsetInFile + offsetIntoClip, remainingDuration);
+        source.start(now, stretchedOffset + offsetIntoClip, remainingDuration);
       }
     }
 
@@ -342,6 +365,7 @@ export class AudioEngine {
       nodes.panner.disconnect();
     });
     this.channelNodes.clear();
+    clearStretchCache();
 
     if (this.metronomeGain) {
       this.metronomeGain.disconnect();
