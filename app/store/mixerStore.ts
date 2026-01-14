@@ -60,6 +60,19 @@ export const useMixerStore = create<MixerState>()(
       });
     },
 
+    updateAudioFileTempo: (fileId: string, tempo: number | undefined) => {
+      set((state) => {
+        const file = state.audioFiles[fileId];
+        if (file) {
+          if (tempo === undefined) {
+            file.tempo = undefined;
+          } else {
+            file.tempo = Math.max(20, Math.min(300, tempo));
+          }
+        }
+      });
+    },
+
     createClip: (audioFileId: string, trackId: string, startTime: number) => {
       const audioFile = get().audioFiles[audioFileId];
       if (!audioFile) return '';
