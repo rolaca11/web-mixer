@@ -43,6 +43,7 @@ export interface TransportState {
   loopStart: number;
   loopEnd: number;
   tempo: number;
+  metronomeEnabled: boolean;
 }
 
 export interface UIState {
@@ -106,6 +107,7 @@ export interface MixerState {
   setCurrentTime: (time: number) => void;
   setLoop: (enabled: boolean, start?: number, end?: number) => void;
   setTempo: (tempo: number) => void;
+  setMetronome: (enabled: boolean) => void;
 
   setZoom: (zoom: number) => void;
   setScrollX: (scrollX: number) => void;
