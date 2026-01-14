@@ -70,6 +70,8 @@ export interface ScheduledClip {
   startTime: number;
   offsetInFile: number;
   duration: number;
+  clipTempo?: number;
+  playbackTempo: number;
 }
 
 export interface MixerState {

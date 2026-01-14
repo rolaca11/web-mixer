@@ -77,11 +77,13 @@ export function useAudioEngine() {
         startTime: clip.startTime,
         offsetInFile: clip.offsetInFile,
         duration: clip.duration,
+        clipTempo: audioFile.tempo,
+        playbackTempo: transport.tempo,
       });
     });
 
     return result;
-  }, [clips, audioFiles, tracks]);
+  }, [clips, audioFiles, tracks, transport.tempo]);
 
   const handlePlay = useCallback(() => {
     const engine = engineRef.current;
